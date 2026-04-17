@@ -1,0 +1,38 @@
+class Solution:
+    def getSum(self, a: int, b: int) -> int:
+        res = 0b0
+
+        mask = 0b1
+        carry = 0b0
+        fixed_width = 0xFFFFFFFF
+
+        # narrowed into 32bits
+        a, b = a & fixed_width, b & fixed_width
+
+        # [0,31]
+        for i in range(32):
+            lowest_bit_of_a = a & mask
+            lowest_bit_of_b = b & mask
+
+            sum_of_bit = lowest_bit_of_a ^ lowest_bit_of_b ^ carry
+
+            if lowest_bit_of_a == 0b1 and lowest_bit_of_b == 0b1:
+                carry = 0b1
+            elif lowest_bit_of_a ^ lowest_bit_of_b == 0b1 and carry == 0b1:
+                carry = 0b1
+            else:
+                carry = 0b0
+            
+            if sum_of_bit == 0b1:
+                res |= sum_of_bit << i
+
+            a >>= 1
+            b >>= 1
+        
+        # 最高位是1，是负数，需要补码转换
+        if res > 0x7FFFFFFF:
+            # 等价于：res - (1 << 32)
+            res = res - (1<<32)
+            # res = ~(res^0xFFFFFFFF)
+
+        return res
